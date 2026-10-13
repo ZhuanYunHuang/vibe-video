@@ -14,6 +14,9 @@ export const Video: React.FC<{ spec: VideoSpec }> = ({ spec }) => {
   );
   const duration = beat.bf(spec.totalBeats) + spec.tailFrames;
   const bodyEnd = beat.bf(spec.totalBeats);
+  // 风格可覆盖：未指定时用默认的网格背景与进度条
+  const Backdrop = spec.Backdrop ?? BeatGrid;
+  const Hud = spec.Hud ?? ProgressHud;
 
   return (
     <BeatProvider beat={beat}>
@@ -30,17 +33,14 @@ export const Video: React.FC<{ spec: VideoSpec }> = ({ spec }) => {
           const Comp = s.Comp;
           return (
             <Sequence key={s.start} from={from} durationInFrames={dur} name={Comp.name}>
-              <SceneShell type={s.trans} total={isLast ? dur + 999 : dur} bg={s.bg}>
-                <BeatGrid />
+              <SceneShell type={s.trans} total={isLast ? dur + 999 : dur} bg={s.bg} exitDim={spec.exitDim}>
+                <Backdrop />
                 <Comp start={s.start} />
               </SceneShell>
             </Sequence>
           );
         })}
-        <ProgressHud
-          cutFrames={spec.scenes.slice(1).map((s) => beat.bf(s.start))}
-          totalFrames={bodyEnd}
-        />
+        <Hud cutFrames={spec.scenes.slice(1).map((s) => beat.bf(s.start))} totalFrames={bodyEnd} />
       </AbsoluteFill>
     </BeatProvider>
   );

@@ -13,7 +13,11 @@ export type TransType =
   | "blinds"
   | "diag"
   | "spin"
-  | "glitch";
+  | "glitch"
+  | "fade";
+
+// 底部 HUD 入参：切场帧（用于闪光）与正片总帧数
+export type HudProps = { cutFrames: number[]; totalFrames: number };
 
 // 场景定义：start/end 均为拍号，切换点落在强拍上
 export type SceneDef = {
@@ -46,4 +50,8 @@ export type VideoSpec = {
   width: number;
   height: number;
   scenes: SceneDef[];
+  // 以下为可选的风格覆盖：不填则沿用默认的霓虹网格风格
+  Backdrop?: React.FC; // 每个场景内的背景层
+  Hud?: React.FC<HudProps>; // 全片顶层 HUD（进度条/切场闪光）
+  exitDim?: number; // 场景退场时的压暗程度，默认 0.5
 };

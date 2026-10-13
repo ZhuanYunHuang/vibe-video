@@ -25,8 +25,9 @@ export const SceneShell: React.FC<{
   type: TransType;
   total: number;
   bg: string;
+  exitDim?: number;
   children: React.ReactNode;
-}> = ({ type, total, bg, children }) => {
+}> = ({ type, total, bg, exitDim = 0.5, children }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const { TRANS } = useBeat();
@@ -67,6 +68,10 @@ export const SceneShell: React.FC<{
       };
       break;
     }
+    case "fade":
+      // 纯交叉淡入：前后场景布局一致时无缝衔接
+      style = { opacity: p };
+      break;
     default:
       break;
   }
@@ -76,8 +81,8 @@ export const SceneShell: React.FC<{
       <AbsoluteFill
         style={{
           background: bg,
-          transform: `scale(${1 - exit * 0.08})`,
-          filter: exit > 0 ? `brightness(${1 - exit * 0.5})` : undefined,
+          transform: exitDim > 0 ? `scale(${1 - exit * 0.08})` : undefined,
+          filter: exit > 0 && exitDim > 0 ? `brightness(${1 - exit * exitDim})` : undefined,
           overflow: "hidden",
         }}
       >
