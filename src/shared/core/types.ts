@@ -54,4 +54,5 @@ export type VideoSpec = {
   Backdrop?: React.FC; // 每个场景内的背景层
   Hud?: React.FC<HudProps>; // 全片顶层 HUD（进度条/切场闪光）
   exitDim?: number; // 场景退场时的压暗程度，默认 0.5
+  Cover?: React.FC; // 可选：视频封面（静态图，注册为 <Still>，用 npm run still 导出 PNG）
 };

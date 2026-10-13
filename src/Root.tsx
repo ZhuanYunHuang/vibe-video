@@ -1,5 +1,5 @@
 import React from "react";
-import { Composition } from "remotion";
+import { Composition, Still } from "remotion";
 import { FPS, Video, VideoSpec, videoDuration } from "./shared";
 import { VIDEOS } from "./videos";
 
@@ -24,5 +24,18 @@ export const RemotionRoot = () => (
         height={spec.height}
       />
     ))}
+    {/* 封面：spec 提供了 Cover 的业务，自动注册一张同尺寸的静态图，id 为 <视频id>Cover */}
+    {VIDEOS.map((spec) => {
+      const Cover = spec.Cover;
+      return Cover ? (
+        <Still
+          key={`${spec.id}Cover`}
+          id={`${spec.id}Cover`}
+          component={Cover}
+          width={spec.width}
+          height={spec.height}
+        />
+      ) : null;
+    })}
   </>
 );
