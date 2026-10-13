@@ -19,7 +19,12 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
 1. **只改 `src/videos/<id>/`、`public/<id>/`、`src/videos/index.ts`**；不要为了某支视频去改 `src/shared/`。
 2. **`_template` 目录不注册 Composition**，它只是复制用的骨架。
 3. **视频目录 id 与资源目录 id 保持一致**：`src/videos/<id>/` ↔ `public/<id>/`。
-4. 场景切换点（`scenes[].start/end`）应落在**强拍**上；动画触发点用 `useAt(start, k)` 对齐节拍。
+4. **卡点规则（核心）**：BGM 每 **4 小节** 是一个乐句，乐句的第一拍是**重拍**。
+   - 场景切换点（`scenes[].start/end`）取 **16 的倍数拍**（4/4 拍下 4 小节 = 16 拍），这样切场天然落在重拍上。
+   - **每 4 小节必须安排一次大卡点**：要么切场转场，要么做一次强烈的内容跳变（数字跳变 / 元素砸入 / 路径画出）。
+   - 两个大卡点之间（约 6~7s）**不允许出现"画面在干等下一个转场"的空档**，用内容跳变填满。
+   - 其余拍子按需卡点（元素出场、数字砸入），优先选分析输出的"强拍总表"里的拍。
+   - **不要给整幅画面加每拍抖动/缩放**（观感会晕）；跟拍只让内容元素动。
 5. **每支视频都要配一张封面**：在业务目录写 `Cover.tsx`，挂到 `spec.Cover`，随视频一起交付（它是视频的门面，必须与视频同风格、同主题）。
 
 ## 生成流程（8 步）
@@ -32,7 +37,8 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
   - 换算：`totalBeats ≈ 目标秒数 × bpm / 60`（bpm 112.8 时，2~3 分钟 ≈ 226~339 拍；bpm 120 时 ≈ 240~360 拍）。
   - 最终时长 ≈ `totalBeats × 60/bpm + tailFrames/FPS` 秒（正片 + 收尾）。
   - 目标 3 分钟就取区间上限（如 112.8bpm 取 ~336 拍，参考 `binary-search`）；实在撑不满 3 分钟就退到 2 分钟下限，**不要为凑时长注水**。
-  - 每幕拍数按内容分配（切换点落强拍，主体幕通常 16~48 拍）。
+  - 每幕拍数按内容分配，且**取 16 的倍数**（4 小节）：主体幕通常 16 / 32 / 48 拍。
+  - **分幕时先把大卡点铺出来**：把总拍数按 16 拍一段列出来，逐段标"转场"还是"内容跳变"，再决定每幕占几段。
 
 ### 步骤 1 · 复制骨架
 把 `src/videos/_template/` 整个复制成 `src/videos/<id>/`（`<id>` 用 kebab-case，如 `web-request`）。
@@ -43,13 +49,21 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
 - 可以复用已有业务的音频（如 `web-request/bgm.mp3` 被 `qrcode`、`binary-search` 复用），只要放一份到自己的资源目录。
 - 资源目录必须与视频目录同 id。
 
-### 步骤 3 · 分析节拍
+### 步骤 3 · 分析节拍（决定卡点，最关键的一步）
 ```
 npm run beat -- public/<id>/bgm.mp3
 ```
-输出会给出：`bpm`、`首拍相位(offset)`、`每拍帧数`、`可用拍数`，以及**可直接粘贴进 spec.ts** 的三行（`bpm` / `offset` / `totalBeats`）。把它们填进 `spec.ts`。
-- `totalBeats` 不要超过音频"可用拍数"，否则片尾会没声音。
-- 输出的"强起音点"可用来核对小节边界（每 4 / 8 拍应落在强起音上）。
+输出分三部分，**都要用上**：
+1. **拍速参数**：`bpm`、`首拍相位(offset)`、`每拍帧数`、`可用拍数`，以及可直接粘贴进 `spec.ts` 的 `bpm` / `offset` / `totalBeats` 三行。
+   - `totalBeats` 不要超过音频"可用拍数"，否则片尾会没声音。
+   - 若输出提示"检测到半速误判"，**按提示的双倍 BPM 填 spec**（offset 不变）——BPM 检测常把快歌听成一半速度。
+2. **重拍结构**：给出 4 小节（16 拍）边界的抬升系数。>1 说明边界确实更重，卡点可按 16 拍铺。
+3. **大卡点落点表**：每 16 拍一行的「拍号 / 秒数 / ★或△ / 强度」。
+   - `★` = 该拍明显偏重，**直接在这里切场**；
+   - `△` = 该边界偏弱，别硬切场，改做内容跳变（数字跳变 / 元素砸入）；
+   - 还有一张"强拍总表"，供幕内小卡点挑拍用。
+
+**把落点表抄进 `spec.ts` 的注释**，让 `scenes[]` 的每一个 `start` 都能对上表里的拍号。这一步做完，分镜的拍号就定死了，后面写场景只按这些拍号取 `k(n)`。
 
 ### 步骤 4 · 编写 `spec.ts`
 `spec.ts` 导出唯一一份 `VideoSpec`，字段如下（参照 `src/videos/<已有业务>/spec.ts`）：
@@ -57,18 +71,34 @@ npm run beat -- public/<id>/bgm.mp3
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `id` | string | Composition id，全局唯一（如 `WebRequest`） |
-| `bpm` / `offset` | number | 由步骤 3 得出 |
-| `totalBeats` | number | 正片总拍数；按**目标时长 2~3 分钟（尽量 3 分钟）**反推（见步骤 0），且不超过音频可用拍数 |
+| `bpm` / `offset` | number | 由步骤 3 得出（若提示半速误判，用双倍 BPM） |
+| `totalBeats` | number | 正片总拍数；按**目标时长 2~3 分钟（尽量 3 分钟）**反推（见步骤 0），**且取 16 的倍数**，不超过音频可用拍数 |
 | `transFrames` | number | 转场帧数（让转场结束正好落在拍上，常用 12） |
 | `tailFrames` | number | 结尾留白帧数（常用 30~45） |
 | `bgm` | string | 相对 `public/` 的路径，如 `<id>/bgm.mp3` |
 | `bg` | string | 整片底色 |
 | `width` / `height` | number | 常用 `1920 / 1080` |
-| `scenes` | `SceneDef[]` | 场景表：`{ start, end, Comp, trans, bg }`，`start/end` 为**拍号** |
+| `scenes` | `SceneDef[]` | 场景表：`{ start, end, Comp, trans, bg }`，`start/end` 为**拍号**，全部取 **16 的倍数** |
 | `Backdrop?` | `React.FC` | 可选，场景内背景层（不填用默认 `BeatGrid`） |
 | `Hud?` | `React.FC<HudProps>` | 可选，顶层 HUD（不填用默认 `ProgressHud`） |
 | `exitDim?` | number | 可选，退场压暗程度，默认 `0.5`；纸面风格常设 `0` |
 | `Cover?` | `React.FC` | 封面组件；挂上后自动注册为 id `<视频id>Cover` 的 Still（步骤 7） |
+
+**`scenes[]` 的写法（按大卡点铺）**：
+
+```ts
+// 大卡点落点（来自 npm run beat）：0★ / 16△ / 32★ / 48△ / 64△ ...
+// 规则：每个 start 取 16 的倍数；★ 处切场，幕内部的 △ 处做内容跳变
+scenes: [
+  { start: 0,  end: 16, Comp: Intro,      trans: "none",      bg: P.bg },
+  { start: 16, end: 32, Comp: AppUI,      trans: "zoom",      bg: P.bg },
+  { start: 32, end: 64, Comp: MapToGraph, trans: "slideLeft", bg: P.land }, // 内部跳变：拍 48
+  { start: 64, end: 80, Comp: Weighted,   trans: "circle",    bg: P.bg },
+  ...
+],
+```
+
+> 关键：**场景长度是 16 的整数倍**。若某幕内容只需 24 拍，就凑成 32 拍（加一个内部跳变），不要出现 24 或 40 这种非 16 倍数。
 
 ### 步骤 5 · 编写场景
 每个场景一个文件 `scenes/<Name>.tsx`，统一签名：
@@ -91,8 +121,11 @@ export const MyScene: React.FC<SceneProps> = ({ start }) => {
 ```
 
 - 场景内所有动画触发点都用 `k(n)` 卡在拍上；节奏脉冲可用 `useBeat().beatPulse(frame)`。
+- **幕内必须安排跳变**：一幕若跨过 16 拍边界（如 32 拍长），要在这些边界处各做一次内容跳变，避免"画面在干等"。跳变示例：数字从 92 跳到 259、卡片整块砸入、路径一次性画满、画面元素堆叠刷新。
+- 触发点写法：`const jumpAt = k(16)` 后配 `hit(t, jumpAt, 6)` / `pop(t, jumpAt, 10)`，卡点落在拍上就自然跟拍。
 - `TransType` 可选值：`none | zoom | slideLeft | slideUp | circle | blinds | diag | spin | glitch | fade`。
   - 相邻场景**布局一致**时用 `fade` 交叉淡入，画面连续不跳。
+  - 大卡点处（★）可用更"重"的转场；全屏覆盖式的招牌转场（如整屏路线扫过）底层场景设 `trans: "none"` 硬切即可。
 
 ### 步骤 6 · 注册
 在 `src/videos/index.ts` 里 `import` 新 spec 并加入 `VIDEOS` 数组：
@@ -156,9 +189,11 @@ npm run render -- <id> out/<id>.mp4               # 渲染成片
 
 - [ ] `id` 全局唯一，且与目录 / `public/<id>/` 一致
 - [ ] BGM 已放到 `public/<id>/bgm.mp3`，`spec.bgm` 路径正确
-- [ ] `bpm` / `offset` / `totalBeats` 来自 `npm run beat`，且 `totalBeats` 不超过音频可用拍数
+- [ ] `bpm` / `offset` / `totalBeats` 来自 `npm run beat`（半速误判时用双倍 BPM），且 `totalBeats` 不超过音频可用拍数、取 16 的倍数
 - [ ] 成片总时长落在 **2~3 分钟**（目标 3 分钟，约 180s）；不够就补内容而非注水
-- [ ] `scenes[].start/end` 连续无空洞、切换点落在强拍
+- [ ] `scenes[].start/end` 连续无空洞、全部取 **16 的倍数**（落在每 4 小节的乐句重拍上）
+- [ ] **每个 16 拍边界都有大卡点**（切场转场 或 强烈内容跳变），没有"干等转场"的空档
+- [ ] 没有给整幅画面加每拍抖动（跟拍只发生在内容元素上）
 - [ ] 每个场景文件从 `../../../shared` import，统一 `React.FC<SceneProps>`
 - [ ] 已在 `src/videos/index.ts` 注册
 - [ ] 已写 `Cover.tsx` 并挂到 `spec.Cover`；封面与视频**同主题同风格**，且不含节拍 context 依赖
@@ -168,7 +203,10 @@ npm run render -- <id> out/<id>.mp4               # 渲染成片
 ## 常见坑
 
 - **BGM 时长不足**：`totalBeats` 超过音频可用拍数 → 片尾静音。回到步骤 3 调小。
-- **不跟拍**：切换点或动画触发没落在强拍 → 用 `npm run beat` 的强起音点核对，或改用 `useAt(start, k)`。
+- **切场不跟拍**：切换点没落在乐句重拍上（观感像"画面在原地等"）→ 把 `scenes[].start/end` 都改成 16 的倍数。
+- **两个大卡点之间空档**：幕跨了 16 拍边界却什么都没发生 → 在该边界加一次内容跳变。
+- **全片抖动**：给场景根节点加了每拍 scale/rotate → 观感会晕，删掉；只让内容元素跟拍。
+- **BPM 半速误判**：`npm run beat` 把快歌听成一半速度（输出会提示）→ 按双倍 BPM 填 spec，offset 不变。
 - **画面跳变**：相邻场景布局一致却没复用队形/坐标、又用了非 `fade` 转场 → 改 `fade` 并保持元素坐标一致。
 - **误注册骨架**：把 `_template` 加进了 `VIDEOS` → 骨架不注册，只在 `videos/index.ts` 注册真实业务。
 - **资源放错目录**：BGM 放到 `public/` 根或别的 id 目录 → 必须 `public/<id>/`。
