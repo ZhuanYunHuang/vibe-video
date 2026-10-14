@@ -1,4 +1,5 @@
 import React from "react";
+import type { StyleKit } from "../../styles/contract";
 
 // 场景组件统一入参：start 为该场景的起始拍号
 export type SceneProps = { start: number };
@@ -45,12 +46,13 @@ export type VideoSpec = {
   totalBeats: number;
   transFrames: number; // 转场帧数
   tailFrames: number; // 结尾留白帧数
-  bgm: string; // 相对 public 的路径
-  bg: string; // 整片底色
+  bgm?: string; // 相对 public 的路径；演示片等无音频可不填（节拍仍由 bpm/offset 驱动）
+  bg?: string; // 整片底色；缺省时回退 style.P.bg，再回退默认 C.bg
   width: number;
   height: number;
   scenes: SceneDef[];
-  // 以下为可选的风格覆盖：不填则沿用默认的霓虹网格风格
+  // 风格来源（优先级）：style 整套风格包 < Backdrop/Hud 显式覆盖；都没有则用默认霓虹网格风格
+  style?: StyleKit;
   Backdrop?: React.FC; // 每个场景内的背景层
   Hud?: React.FC<HudProps>; // 全片顶层 HUD（进度条/切场闪光）
   exitDim?: number; // 场景退场时的压暗程度，默认 0.5

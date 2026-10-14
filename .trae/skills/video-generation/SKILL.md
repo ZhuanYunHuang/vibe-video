@@ -17,6 +17,7 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
 ## 铁律（不要违反）
 
 1. **只改 `src/videos/<id>/`、`public/<id>/`、`src/videos/index.ts`**；不要为了某支视频去改 `src/shared/`。
+   （例外：选风格时 `kit/index.ts` 一行 re-export `src/styles/<风格名>` 是允许且推荐的做法，见「风格库」一节。）
 2. **`_template` 目录不注册 Composition**，它只是复制用的骨架。
 3. **视频目录 id 与资源目录 id 保持一致**：`src/videos/<id>/` ↔ `public/<id>/`。
 4. **卡点规则（核心）**：BGM 每 **4 小节** 是一个乐句，乐句的第一拍是**重拍**。
@@ -40,9 +41,15 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
   - 每幕拍数按内容分配，且**取 16 的倍数**（4 小节）：主体幕通常 16 / 32 / 48 拍。
   - **分幕时先把大卡点铺出来**：把总拍数按 16 拍一段列出来，逐段标"转场"还是"内容跳变"，再决定每幕占几段。
 
-### 步骤 1 · 复制骨架
+### 步骤 1 · 复制骨架 + 选风格
 把 `src/videos/_template/` 整个复制成 `src/videos/<id>/`（`<id>` 用 kebab-case，如 `web-request`）。
 产物：`spec.ts`（配置）+ `scenes/`（场景）+ `Cover.tsx`（封面）。
+
+**选风格**（详见 `src/styles/README.md`，已交付：白板手绘 `whiteboard` / 像素 `pixel` / 扁平 MG `flat`）：
+- 在 `src/videos/<id>/kit/index.ts` 写一行 `export * from "../../../styles/<风格名>";`
+- 场景统一 `import { Stage, Sub, Chapter, Slam, Card, Stamp, Mark, P, useK, usePulse } from "../kit";`
+- `spec.ts` 加 `style: kit`（`bg`/`exitDim` 可省，自动取 kit 推荐值）；封面用 `kit.makeCover({ title, subtitle, badge })`。
+- 不选风格则维持现状（shared 默认霓虹网格 + 自己写 kit）。
 
 ### 步骤 2 · 放置 BGM
 音频放到 `public/<id>/bgm.mp3`。
@@ -75,11 +82,12 @@ npm run beat -- public/<id>/bgm.mp3
 | `totalBeats` | number | 正片总拍数；按**目标时长 2~3 分钟（尽量 3 分钟）**反推（见步骤 0），**且取 16 的倍数**，不超过音频可用拍数 |
 | `transFrames` | number | 转场帧数（让转场结束正好落在拍上，常用 12） |
 | `tailFrames` | number | 结尾留白帧数（常用 30~45） |
-| `bgm` | string | 相对 `public/` 的路径，如 `<id>/bgm.mp3` |
-| `bg` | string | 整片底色 |
+| `bgm` | string? | 可选，相对 `public/` 的路径，如 `<id>/bgm.mp3`；无音频演示片可省（节拍仍由 bpm/offset 驱动） |
+| `bg` | string? | 可选，整片底色；缺省回退 `style.P.bg`，再回退默认调色板 |
 | `width` / `height` | number | 常用 `1920 / 1080` |
 | `scenes` | `SceneDef[]` | 场景表：`{ start, end, Comp, trans, bg }`，`start/end` 为**拍号**，全部取 **16 的倍数** |
-| `Backdrop?` | `React.FC` | 可选，场景内背景层（不填用默认 `BeatGrid`） |
+| `style?` | `StyleKit` | 可选，整套风格包（`import { kit } from "./kit"`）；背景/HUD/推荐 exitDim 一次生效 |
+| `Backdrop?` | `React.FC` | 可选，场景内背景层（不填用 `style.Backdrop`，再默认 `BeatGrid`） |
 | `Hud?` | `React.FC<HudProps>` | 可选，顶层 HUD（不填用默认 `ProgressHud`） |
 | `exitDim?` | number | 可选，退场压暗程度，默认 `0.5`；纸面风格常设 `0` |
 | `Cover?` | `React.FC` | 封面组件；挂上后自动注册为 id `<视频id>Cover` 的 Still（步骤 7） |
@@ -123,6 +131,7 @@ export const MyScene: React.FC<SceneProps> = ({ start }) => {
 - 场景内所有动画触发点都用 `k(n)` 卡在拍上；节奏脉冲可用 `useBeat().beatPulse(frame)`。
 - **幕内必须安排跳变**：一幕若跨过 16 拍边界（如 32 拍长），要在这些边界处各做一次内容跳变，避免"画面在干等"。跳变示例：数字从 92 跳到 259、卡片整块砸入、路径一次性画满、画面元素堆叠刷新。
 - 触发点写法：`const jumpAt = k(16)` 后配 `hit(t, jumpAt, 6)` / `pop(t, jumpAt, 10)`，卡点落在拍上就自然跟拍。
+- **动效增强**：场景里可直接用 `src/shared/motion/` 动效工具箱（打字机 / 数字滚动 / 路径描画 / 飞沿路径 / 遮罩揭示 / 引线标注 / 粒子场 / 摆动落定 / 视差 / 聚焦推拉 / 冲击波 / 速度线 / 震屏 / 翻牌 / 转场扫屏 —— 19 项，从 `../../../shared` 导入，清单见文末「shared API 速查」），提升动态感、避免"像 PPT"。
 - `TransType` 可选值：`none | zoom | slideLeft | slideUp | circle | blinds | diag | spin | glitch | fade`。
   - 相邻场景**布局一致**时用 `fade` 交叉淡入，画面连续不跳。
   - 大卡点处（★）可用更"重"的转场；全屏覆盖式的招牌转场（如整屏路线扫过）底层场景设 `trans: "none"` 硬切即可。
@@ -159,13 +168,18 @@ npm run typecheck                                # 类型检查，退出码必�
 npm run studio                                   # 打开 Remotion Studio 预览（核对节奏/卡点/封面）
 npm run still -- <id> --scale=0.25 --frame=30    # 抽视频单帧快速自查布局
 npm run still -- <id>Cover out/<id>/cover.png     # 导出封面 PNG
-npm run render -- <id> out/<id>.mp4               # 渲染成片
+npm run render -- <id> out/<id>/<id>.mp4          # 渲染成片
 ```
+> **输出目录约定**：每支视频的产物一律放独立目录 `out/<id>/`（成片、封面、竖版/历史版本都在里面），**不要散放在 `out/` 根目录**。
 
-## 风格：默认 vs 自定义
+## 风格：风格库（首选）vs 默认 vs 自定义
 
-- **默认霓虹网格风格**：不填 `Backdrop` / `Hud`，即用 `shared` 默认的深蓝网格背景（随节拍呼吸）+ 渐变进度条 HUD。`web-request`、`qrcode` 用的是这一套，靠 `scenes[].bg` 换章节底色。
-- **自定义风格覆盖**：当选题需要不同气质时（例如纸质绘本风），在 `spec.ts` 里覆盖 `Backdrop` / `Hud` / `exitDim`，并在业务目录下建 `kit/` 放专属资源。
+- **风格库（首选，见 `src/styles/README.md`）**：已交付 9 套 —— `whiteboard` 白板手绘 / `pixel` 像素风 / `flat` 扁平 MG /
+  `shadowpuppet` 皮影戏 / `cyberhud` 赛博 HUD / `datainfo` 数据信息图 / `collage` 拼贴 / `bauhaus` Bauhaus / `synthwave` Synthwave。
+  用法：`kit/index.ts` 一行 `export * from "../../../styles/<风格名>";` → 场景从 `"../kit"` 取同名契约组件 → `spec.ts` 挂 `style: kit`。
+  契约（`src/styles/contract.ts`）：组件同名同签名（`Stage/Sub/Chapter/Slam/Card/Stamp/Mark/Kicks/Particles`）+ 语义色板 `P` + `useK/usePulse` + `makeCover`。
+- **默认霓虹网格风格**：不填 `style` / `Backdrop` / `Hud`，即用 `shared` 默认的深蓝网格背景（随节拍呼吸）+ 渐变进度条 HUD。`web-request`、`qrcode` 用的是这一套，靠 `scenes[].bg` 换章节底色。
+- **自定义风格覆盖**：当选题需要全新气质且风格库没有时，在业务目录下建 `kit/` 放专属资源，`spec.ts` 覆盖 `Backdrop` / `Hud` / `exitDim`。
   - 范例：`src/videos/binary-search/` —— 暖白纸面 + 陶土橙，`kit/theme.ts`（专属配色 `P` + 队形常量）、`kit/Clawd.tsx`（像素小人）、`kit/Queue.tsx`、`kit/ui.tsx`（自定义 `PaperBackdrop` / `ClawdHud` 等）。
 
 ## shared API 速查（业务侧只从 `../../../shared` import）
@@ -184,6 +198,13 @@ npm run render -- <id> out/<id>.mp4               # 渲染成片
   - `SceneShell`（`{ type, total, bg, exitDim?, children }` 转场外壳，通常由装配器调用）
   - `BeatGrid`（默认背景）、`ProgressHud`（默认 HUD）
 - **类型**：`SceneProps`、`SceneDef`、`TransType`、`VideoSpec`、`Beat`、`HudProps`。
+- **动效工具箱（`src/shared/motion/`，19 项，t/from 纯函数、Still 可冻结）**：
+  - 文字：`Typewriter` / `CountUp` / `StaggerText` / `StrokeFillText` / `RgbSplitText` / `ChromeText`
+  - 路径揭示（依赖 @remotion/paths）：`DrawPath` / `PathFollower` / `MaskReveal` / `Callout`
+  - 环境持续：`ParticleField` / `Sway` / `ParallaxLayers` / `FocusZoom`
+  - 冲击转场：`Shockwave` / `SpeedLines` / `ShakeWrapper`(＋`shake`) / `FlipCard` / `TransitionSweep`
+  - 工具：`rnd` / `clamp01` / `polar`；基础包络新增 `elastic` / `sway`
+  - 详情 `src/shared/motion/README.md`；演示 `npm run render -- MotionDemo out/motion/demo.mp4`
 
 ## 检查清单
 
@@ -194,7 +215,8 @@ npm run render -- <id> out/<id>.mp4               # 渲染成片
 - [ ] `scenes[].start/end` 连续无空洞、全部取 **16 的倍数**（落在每 4 小节的乐句重拍上）
 - [ ] **每个 16 拍边界都有大卡点**（切场转场 或 强烈内容跳变），没有"干等转场"的空档
 - [ ] 没有给整幅画面加每拍抖动（跟拍只发生在内容元素上）
-- [ ] 每个场景文件从 `../../../shared` import，统一 `React.FC<SceneProps>`
+- [ ] 每个场景文件从 `../../../shared` 或 `"../kit"`（选风格库时）import，统一 `React.FC<SceneProps>`
+- [ ] 若选了风格库：`kit/index.ts` 已 re-export 目标风格、`spec.style` 已挂、封面用 `kit.makeCover(...)`
 - [ ] 已在 `src/videos/index.ts` 注册
 - [ ] 已写 `Cover.tsx` 并挂到 `spec.Cover`；封面与视频**同主题同风格**，且不含节拍 context 依赖
 - [ ] 已导出封面 `out/<id>/cover.png`
@@ -212,4 +234,7 @@ npm run render -- <id> out/<id>.mp4               # 渲染成片
 - **资源放错目录**：BGM 放到 `public/` 根或别的 id 目录 → 必须 `public/<id>/`。
 - **自定义风格漏设退场**：换浅色纸面风格却沿用默认退场压暗 → 设 `exitDim: 0`。
 - **封面误用节拍组件**：封面是静态 Still，误用 `BeatGrid` / `ProgressHud` / `useT` / `useAt` / `useBeat` 会直接报错 → 底纹自绘，别碰节拍 context。
+- **动效组件在静帧里是空的**：动效工具箱的冲击类（`Shockwave` / `SpeedLines` / `TransitionSweep`）与 `Typewriter` 光标在 `t < at/from` 时不可见或返回 null → 封面/展示页里要传有效帧（如 `at + 8`），别传 0。
 - **封面与视频脱节**：封面没复用视频的配色 / 母题 → 必须同主题同风格，让人一眼认出属于这支视频。
+- **换风格没改 re-export**：场景从 `"../kit"` 导入、但 `kit/index.ts` 还指着旧风格 → 画面风格混乱；换风格只改那一行。
+- **像素字体未加载**：pixel 风格若 `public/fonts/` 字体缺失或没挂 `PixelFontLoader` → 汉字回退系统字体，像素质感消失（不报错，靠抽帧核对）。
