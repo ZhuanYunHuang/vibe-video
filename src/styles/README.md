@@ -55,6 +55,7 @@ import { Stage, Sub, Chapter, Slam, Card, Stamp, Mark, Kicks, Particles, P, FONT
 
 效果预览：`out/styles/demo-<id>.mp4` 共 15 支（同一段三幕脚本分别用十五套风格渲染，验证「换 kit 即换风格」）；
 一页 15 格总览见 `out/styles/gallery.png`。
+**仓库内预览副本**在 [`preview/`](./preview/README.md)：每套一张风格封面（`StyleCover-<id>`）+ 演示片 + 总览页 + 视觉索引（`out/` 不入库，复制而来）。
 
 ---
 
@@ -381,7 +382,9 @@ gold `#3DE8FF`（霓虹青）/ seal `#FFD23F`（落日黄）。星点 + 条纹�
 1. 新建 `src/styles/<id>/`：`theme.ts`（语义色板映射 + 字体）、`ui.tsx`（契约组件）、
    `fx.tsx`（Backdrop/Hud/Kicks/Particles）、`Cover.tsx`（`makeCover` 工厂）、`index.ts`（导出 `kit: StyleKit`）；
 2. 在 `src/styles/demo/specs.ts` 的 `DEMO_SPECS` 数组加入新 kit（自动获得一支演示片）；
-3. 在 `src/styles/demo/Gallery.tsx` 的 `TILES` 数组把对应灰位换成 kit 瓦片（或追加新瓦片）；
+3. 在 `src/styles/demo/catalog.ts` 的 `STYLE_CATALOG` 追加条目（自动获得展示页瓦片 + `StyleCover-<id>` 封面，
+   name/tag 即封面文案与编号来源）；
 4. 更新本 README：总览表、状态总表、新风格详情小节；
 5. 验收：`npm run typecheck` → `npm run still -- StyleDemo-<id> out/styles/demo-<id>.png --frame=200`
-   → `npm run render -- StyleDemo-<id> out/styles/demo-<id>.mp4` → `npm run still -- StyleGallery out/styles/gallery.png`。
+   → `npm run render -- StyleDemo-<id> out/styles/demo-<id>.mp4` → `npm run still -- StyleGallery out/styles/gallery.png`
+   → `npm run still -- StyleCover-<id> src/styles/preview/cover-<id>.png`，并把演示片与总览复制进 `src/styles/preview/`。

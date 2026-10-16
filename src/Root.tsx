@@ -2,7 +2,7 @@ import React from "react";
 import { Composition, Still } from "remotion";
 import { FPS, Video, VideoSpec, videoDuration } from "./shared";
 import { MOTION_DEMO_FRAMES, MotionDemo, MotionGallery } from "./shared/motion/demo";
-import { DEMO_SPECS, StyleGallery } from "./styles/demo";
+import { DEMO_SPECS, STYLE_COVERS, StyleGallery } from "./styles/demo";
 import { VIDEOS } from "./videos";
 
 // spec 里含有 React 组件，无法作为 defaultProps 序列化，
@@ -39,7 +39,7 @@ export const RemotionRoot = () => (
         />
       ) : null;
     })}
-    {/* 风格库演示：三套风格各一支 12 秒演示片（与业务视频解耦，不进 videos/index.ts） */}
+    {/* 风格库演示：每套风格一支 12 秒演示片（与业务视频解耦，不进 videos/index.ts） */}
     {DEMO_SPECS.map((spec) => (
       <Composition
         key={spec.id}
@@ -51,8 +51,12 @@ export const RemotionRoot = () => (
         height={spec.height}
       />
     ))}
-    {/* 风格展示页：一页并排三套风格（Still） */}
+    {/* 风格展示页：一页 15 格总览（Still） */}
     <Still id="StyleGallery" component={StyleGallery} width={1920} height={1080} />
+    {/* 风格封面：每套风格一张静态封面（StyleCover-<id>，用于仓库内预览副本 src/styles/preview/） */}
+    {STYLE_COVERS.map(({ id, Comp }) => (
+      <Still key={id} id={id} component={Comp} width={1920} height={1080} />
+    ))}
     {/* 动效工具箱演示：19 项动效轮播（TransitionSeries 组装，与业务装配解耦） */}
     <Composition id="MotionDemo" component={MotionDemo} durationInFrames={MOTION_DEMO_FRAMES} fps={FPS} width={1920} height={1080} />
     <Still id="MotionGallery" component={MotionGallery} width={1920} height={1080} />

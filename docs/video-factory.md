@@ -80,6 +80,7 @@ src/videos/<id>/
 
 渲染风格演示片 / 展示页：
 `npm run render -- StyleDemo-<风格id> out/styles/demo-<风格id>.mp4`、`npm run still -- StyleGallery out/styles/gallery.png`
+（仓库内预览副本在 `src/styles/preview/`：15 演示片 + 15 风格封面 + 总览页 + 视觉索引，再生成命令见其 README）
 
 ---
 
@@ -98,7 +99,9 @@ src/videos/<id>/
 - 新视频 `kit/index.ts` 一行 re-export：`export * from "../../../styles/whiteboard";`
 - `spec.ts` 加 `style: kit`（`bg`/`exitDim` 可省，自动取 kit 推荐值）；`bgm`/`bg` 均可选化（无音频演示片可用）。
 - 场景从 `"../kit"` 取组件；`Backdrop`/`Hud` 兼容链为 `spec.Backdrop ?? style.Backdrop ?? 默认`。
-- 风格演示片与展示页由 `src/styles/demo/` 提供，在 `src/Root.tsx` 注册（与业务视频解耦）。
+- 风格演示片与展示页由 `src/styles/demo/` 提供，在 `src/Root.tsx` 注册（与业务视频解耦）；
+  每套**风格封面**（`StyleCover-<id>`，用各 kit 的 `makeCover` 生成，文案来自 `demo/catalog.ts`）同处注册。
+- **仓库内预览副本**在 `src/styles/preview/`（`out/` 不入库）：15 支演示片 + 15 张封面 + 总览图 + 视觉索引 README。
 
 ---
 
