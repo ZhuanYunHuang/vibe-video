@@ -4,10 +4,16 @@ import { kit as bauhaus } from "../bauhaus";
 import { kit as collage } from "../collage";
 import { kit as cyberhud } from "../cyberhud";
 import { kit as datainfo } from "../datainfo";
+import { kit as explode } from "../explode";
 import { kit as flat } from "../flat";
+import { kit as hanzi } from "../hanzi";
+import { kit as mathviz } from "../mathviz";
 import { kit as pixel } from "../pixel";
+import { kit as picturebook } from "../picturebook";
+import { kit as scale } from "../scale";
 import { kit as shadowpuppet } from "../shadowpuppet";
 import { kit as synthwave } from "../synthwave";
+import { kit as variety } from "../variety";
 import { kit as whiteboard } from "../whiteboard";
 import { makeCardScene, makeImpactScene, makeTitleScene } from "./scenes";
 
@@ -30,4 +36,4 @@ export const makeDemoSpec = (kit: StyleKit): VideoSpec => ({
     ],
 });
 
-export const DEMO_SPECS: VideoSpec[] = [whiteboard, pixel, flat, shadowpuppet, cyberhud, datainfo, collage, bauhaus, synthwave].map(makeDemoSpec);
+export const DEMO_SPECS: VideoSpec[] = [whiteboard, pixel, flat, shadowpuppet, cyberhud, datainfo, collage, bauhaus, synthwave, mathviz, scale, picturebook, variety, hanzi, explode].map(makeDemoSpec);

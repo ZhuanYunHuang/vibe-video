@@ -89,8 +89,9 @@ src/videos/<id>/
 + `Backdrop`/`Hud` + 一整套**同名契约组件**（`Stage/Sub/Chapter/Slam/Card/Stamp/Mark/Kicks/Particles`）
 + 封面模板 `makeCover`。契约定义在 `src/styles/contract.ts`，所有原语是 `t/from` 纯函数（Still 可冻结渲染）。
 
-**已交付（9 套）**：`whiteboard` 白板手绘、`pixel` 像素风（含 OFL 像素中文字体）、`flat` 扁平 MG、
-`shadowpuppet` 皮影戏、`cyberhud` 赛博 HUD、`datainfo` 数据信息图、`collage` 拼贴、`bauhaus` Bauhaus、`synthwave` Synthwave。
+**已交付（15 套）**：`whiteboard` 白板手绘、`pixel` 像素风（含 OFL 像素中文字体）、`flat` 扁平 MG、
+`shadowpuppet` 皮影戏、`cyberhud` 赛博 HUD、`datainfo` 数据信息图、`collage` 拼贴、`bauhaus` Bauhaus、`synthwave` Synthwave、
+`explode` 3D 拆解、`hanzi` 汉字演变、`variety` 综艺花字、`picturebook` 绘本科画、`mathviz` 数学可视化、`scale` 比例尺对比。
 详情、色板表与批次规划见 **`src/styles/README.md`**。
 
 **怎么用**：

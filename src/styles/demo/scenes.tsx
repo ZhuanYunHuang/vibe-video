@@ -70,7 +70,7 @@ export const makeImpactScene = (kit: StyleKit): React.FC<SceneProps> => {
                     </kit.Slam>
                     <kit.Particles t={t} from={K(17)} x={960} y={470} spread={330} />
                     <kit.Sub t={t} from={K(16)} to={K(24)}>
-                        whiteboard · pixel · flat —— 任你挑
+                        十五套风格 —— 任你挑
                     </kit.Sub>
                 </kit.Kicks>
             </kit.Stage>

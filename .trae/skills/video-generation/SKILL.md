@@ -45,7 +45,7 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
 把 `src/videos/_template/` 整个复制成 `src/videos/<id>/`（`<id>` 用 kebab-case，如 `web-request`）。
 产物：`spec.ts`（配置）+ `scenes/`（场景）+ `Cover.tsx`（封面）。
 
-**选风格**（详见 `src/styles/README.md`，已交付：白板手绘 `whiteboard` / 像素 `pixel` / 扁平 MG `flat`）：
+**选风格**（详见 `src/styles/README.md`，已交付 15 套：白板手绘 `whiteboard`、像素 `pixel`、扁平 MG `flat`、皮影戏 `shadowpuppet`、赛博 HUD `cyberhud`、数据信息图 `datainfo`、拼贴 `collage`、Bauhaus、Synthwave、3D 拆解 `explode`、汉字演变 `hanzi`、综艺花字 `variety`、绘本科画 `picturebook`、数学可视化 `mathviz`、比例尺对比 `scale`）：
 - 在 `src/videos/<id>/kit/index.ts` 写一行 `export * from "../../../styles/<风格名>";`
 - 场景统一 `import { Stage, Sub, Chapter, Slam, Card, Stamp, Mark, P, useK, usePulse } from "../kit";`
 - `spec.ts` 加 `style: kit`（`bg`/`exitDim` 可省，自动取 kit 推荐值）；封面用 `kit.makeCover({ title, subtitle, badge })`。
@@ -174,8 +174,9 @@ npm run render -- <id> out/<id>/<id>.mp4          # 渲染成片
 
 ## 风格：风格库（首选）vs 默认 vs 自定义
 
-- **风格库（首选，见 `src/styles/README.md`）**：已交付 9 套 —— `whiteboard` 白板手绘 / `pixel` 像素风 / `flat` 扁平 MG /
-  `shadowpuppet` 皮影戏 / `cyberhud` 赛博 HUD / `datainfo` 数据信息图 / `collage` 拼贴 / `bauhaus` Bauhaus / `synthwave` Synthwave。
+- **风格库（首选，见 `src/styles/README.md`）**：已交付 15 套 —— `whiteboard` 白板手绘 / `pixel` 像素风 / `flat` 扁平 MG /
+  `shadowpuppet` 皮影戏 / `cyberhud` 赛博 HUD / `datainfo` 数据信息图 / `collage` 拼贴 / `bauhaus` Bauhaus / `synthwave` Synthwave /
+  `explode` 3D 拆解 / `hanzi` 汉字演变 / `variety` 综艺花字 / `picturebook` 绘本科画 / `mathviz` 数学可视化 / `scale` 比例尺对比。
   用法：`kit/index.ts` 一行 `export * from "../../../styles/<风格名>";` → 场景从 `"../kit"` 取同名契约组件 → `spec.ts` 挂 `style: kit`。
   契约（`src/styles/contract.ts`）：组件同名同签名（`Stage/Sub/Chapter/Slam/Card/Stamp/Mark/Kicks/Particles`）+ 语义色板 `P` + `useK/usePulse` + `makeCover`。
 - **默认霓虹网格风格**：不填 `style` / `Backdrop` / `Hud`，即用 `shared` 默认的深蓝网格背景（随节拍呼吸）+ 渐变进度条 HUD。`web-request`、`qrcode` 用的是这一套，靠 `scenes[].bg` 换章节底色。
