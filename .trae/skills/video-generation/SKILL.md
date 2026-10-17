@@ -27,6 +27,10 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
    - 其余拍子按需卡点（元素出场、数字砸入），优先选分析输出的"强拍总表"里的拍。
    - **不要给整幅画面加每拍抖动/缩放**（观感会晕）；跟拍只让内容元素动。
 5. **每支视频都要配一张封面**：在业务目录写 `Cover.tsx`，挂到 `spec.Cover`，随视频一起交付（它是视频的门面，必须与视频同风格、同主题）。
+6. **所有视频默认不挂进度条 / HUD**：不要写底部进度轨、百分比读数、"装配进度"之类的常驻条。
+   - `spec.ts` 不传 `Hud`；
+   - 若用风格包，`kit/index.ts` 里导出的 `Hud` 必须是 `() => null`；
+   - 确需 HUD 时，必须在 `spec` 里显式传 `Hud`，并在交付说明里写明理由。
 
 ## 生成流程（8 步）
 
@@ -88,7 +92,7 @@ npm run beat -- public/<id>/bgm.mp3
 | `scenes` | `SceneDef[]` | 场景表：`{ start, end, Comp, trans, bg }`，`start/end` 为**拍号**，全部取 **16 的倍数** |
 | `style?` | `StyleKit` | 可选，整套风格包（`import { kit } from "./kit"`）；背景/HUD/推荐 exitDim 一次生效 |
 | `Backdrop?` | `React.FC` | 可选，场景内背景层（不填用 `style.Backdrop`，再默认 `BeatGrid`） |
-| `Hud?` | `React.FC<HudProps>` | 可选，顶层 HUD（不填用默认 `ProgressHud`） |
+| `Hud?` | `React.FC<HudProps>` | 可选，顶层 HUD。**默认不启用**：不填时依次回退 `style.Hud` → `ProgressHud`，新片应把风格包的 `Hud` 置为 `() => null`，或在 spec 里显式传空组件 |
 | `exitDim?` | number | 可选，退场压暗程度，默认 `0.5`；纸面风格常设 `0` |
 | `Cover?` | `React.FC` | 封面组件；挂上后自动注册为 id `<视频id>Cover` 的 Still（步骤 7） |
 
@@ -216,6 +220,7 @@ npm run render -- <id> out/<id>/<id>.mp4          # 渲染成片
 - [ ] `scenes[].start/end` 连续无空洞、全部取 **16 的倍数**（落在每 4 小节的乐句重拍上）
 - [ ] **每个 16 拍边界都有大卡点**（切场转场 或 强烈内容跳变），没有"干等转场"的空档
 - [ ] 没有给整幅画面加每拍抖动（跟拍只发生在内容元素上）
+- [ ] **成片没有底部进度条 / 百分比读数 / 装配进度轨**（默认不挂 HUD）
 - [ ] 每个场景文件从 `../../../shared` 或 `"../kit"`（选风格库时）import，统一 `React.FC<SceneProps>`
 - [ ] 若选了风格库：`kit/index.ts` 已 re-export 目标风格、`spec.style` 已挂、封面用 `kit.makeCover(...)`
 - [ ] 已在 `src/videos/index.ts` 注册

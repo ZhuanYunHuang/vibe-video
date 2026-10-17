@@ -30,7 +30,7 @@ src/shared/
 ├── runtime/              ← React Context 运行时
 │   └── beat-context.tsx    BeatProvider / useBeat / useT / useAt
 ├── motion/               ← 通用动效工具箱（19 项：text/path/ambient/impact + demo）
-└── components/           ← 可视化组件（Center/NodeBox/Packet/Wire/Caption/SceneTitle/SceneShell/BeatGrid/ProgressHud）
+└── components/           ← 可视化组件（Center/NodeBox/Packet/Wire/Caption/SceneTitle/SceneShell/BeatGrid/ProgressHud；ProgressHud 为历史默认值，新片不使用）
 ```
 
 ### `src/videos/<id>/` 结构
@@ -98,7 +98,8 @@ src/videos/<id>/
 **怎么用**：
 - 新视频 `kit/index.ts` 一行 re-export：`export * from "../../../styles/whiteboard";`
 - `spec.ts` 加 `style: kit`（`bg`/`exitDim` 可省，自动取 kit 推荐值）；`bgm`/`bg` 均可选化（无音频演示片可用）。
-- 场景从 `"../kit"` 取组件；`Backdrop`/`Hud` 兼容链为 `spec.Backdrop ?? style.Backdrop ?? 默认`。
+- 场景从 `"../kit"` 取组件；兼容链为 `spec.Backdrop ?? style.Backdrop ?? BeatGrid`、`spec.Hud ?? style.Hud ?? ProgressHud`。
+- **默认不挂进度条 / HUD**：`spec` 不传 `Hud`，风格包的 `Hud` 置为 `() => null`；确需 HUD 才显式传，并在交付说明里写理由。
 - 风格演示片与展示页由 `src/styles/demo/` 提供，在 `src/Root.tsx` 注册（与业务视频解耦）；
   每套**风格封面**（`StyleCover-<id>`，用各 kit 的 `makeCover` 生成，文案来自 `demo/catalog.ts`）同处注册。
 - **仓库内预览副本**在 `src/styles/preview/`（`out/` 不入库）：15 支演示片 + 15 张封面 + 总览图 + 视觉索引 README。
