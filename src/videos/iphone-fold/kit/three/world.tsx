@@ -13,7 +13,7 @@ export const Scene3D: React.FC<{
     fog?: [number, number];
 }> = ({ children, fov = 38, pos = [5.2, 2.6, 7.4], bg = "#EDF2F9", fog = [26, 64] }) => (
     <div style={{ position: "absolute", inset: 0 }}>
-        <ThreeCanvas width={1920} height={1080} camera={{ fov, position: pos, near: 0.1, far: 160 }} style={{ position: "absolute", inset: 0 }}>
+        <ThreeCanvas width={1920} height={1080} dpr={1} camera={{ fov, position: pos, near: 0.1, far: 160 }} style={{ position: "absolute", inset: 0 }}>
             <color attach="background" args={[bg]} />
             <fog attach="fog" args={[bg, fog[0], fog[1]]} />
             <ambientLight intensity={1.15} />

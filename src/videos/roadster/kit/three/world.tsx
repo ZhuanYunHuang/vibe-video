@@ -7,7 +7,7 @@ import * as THREE from "three";
 
 export const Scene3D: React.FC<{ children: React.ReactNode; fov?: number; pos?: [number, number, number] }> = ({ children, fov = 42, pos = [7, 4.6, 10] }) => (
     <div style={{ position: "absolute", inset: 0 }}>
-        <ThreeCanvas width={1920} height={1080} camera={{ fov, position: pos, near: 0.1, far: 220 }} style={{ position: "absolute", inset: 0 }}>
+        <ThreeCanvas width={1920} height={1080} dpr={1} camera={{ fov, position: pos, near: 0.1, far: 220 }} style={{ position: "absolute", inset: 0 }}>
             <color attach="background" args={["#14161B"]} />
             <fog attach="fog" args={["#14161B", 26, 72]} />
             <ambientLight intensity={0.55} />

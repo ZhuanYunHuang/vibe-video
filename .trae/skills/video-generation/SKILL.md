@@ -31,6 +31,28 @@ description: "在本 Remotion 视频工厂中新增/生成一支视频：复制 
    - `spec.ts` 不传 `Hud`；
    - 若用风格包，`kit/index.ts` 里导出的 `Hud` 必须是 `() => null`；
    - 确需 HUD 时，必须在 `spec` 里显式传 `Hud`，并在交付说明里写明理由。
+7. **生成新视频后必须自动启动预览**：素材与场景就绪后，立刻在后台执行 `npm run preview`，把 `http://127.0.0.1:5180/?v=<id>` 发给用户；
+   除非用户明确说「不用预览」，否则不要直接渲染成片。
+
+## 本地实时预览（默认工作流）
+
+开发期不要反复整片渲染，先用预览页：
+
+```bash
+npm run preview   # http://127.0.0.1:5180
+```
+
+- 首页列出全部视频，点开即播；改 `src/videos/**` 热更新，不丢当前帧。
+- 快捷键：空格播放、`←/→` 逐帧、`Shift+←/→` 1 秒、`[ ]` 切场、`1–9` 跳场、`D` 调试、`M` 静音、`F` 全屏、`R` 渲染面板。
+- 调试模式能看到每场的拍号与帧区间、逐帧、按场循环。
+- 只有确认后才渲染：`npm run render ...`，或在预览页点「渲染成片」（试渲染产物落 `out/preview/`）。
+- **交付前必须先在预览页完整过一遍**，再渲成片。
+
+**Agent 执行约定（强约束）**：
+1. 新视频的 `spec.ts`、场景、素材一落地，就 `npm run preview`（后台常驻，别等用户问）。
+2. 把带视频 id 的链接直接发给用户：`http://127.0.0.1:5180/?v=<id>`；需要看分镜就加 `&debug=1`。
+3. 预览服务已在运行时不要重复启动；端口被占先确认是不是旧实例。
+4. 只有用户说「渲染 / 出片 / 生成视频」时才执行 `npm run render`，或让用户点页面里的「渲染成片」。
 
 ## 生成流程（8 步）
 
@@ -169,10 +191,11 @@ export const VIDEOS: VideoSpec[] = [webRequest, qrcode, binarySearch, myVideo];
 ### 步骤 8 · 校验与渲染
 ```
 npm run typecheck                                # 类型检查，退出码必须为 0
-npm run studio                                   # 打开 Remotion Studio 预览（核对节奏/卡点/封面）
+npm run typecheck:preview                        # 预览页/渲染接口类型检查
+npm run preview                                  # 启动实时预览，把 ?v=<id> 链接发给用户
 npm run still -- <id> --scale=0.25 --frame=30    # 抽视频单帧快速自查布局
 npm run still -- <id>Cover out/<id>/cover.png     # 导出封面 PNG
-npm run render -- <id> out/<id>/<id>.mp4          # 渲染成片
+npm run render -- <id> out/<id>/<id>.mp4          # 用户确认后再渲染成片
 ```
 > **输出目录约定**：每支视频的产物一律放独立目录 `out/<id>/`（成片、封面、竖版/历史版本都在里面），**不要散放在 `out/` 根目录**。
 
@@ -225,6 +248,7 @@ npm run render -- <id> out/<id>/<id>.mp4          # 渲染成片
 - [ ] 若选了风格库：`kit/index.ts` 已 re-export 目标风格、`spec.style` 已挂、封面用 `kit.makeCover(...)`
 - [ ] 已在 `src/videos/index.ts` 注册
 - [ ] 已写 `Cover.tsx` 并挂到 `spec.Cover`；封面与视频**同主题同风格**，且不含节拍 context 依赖
+- [ ] 已用 `npm run preview` 完整过片，再渲成片
 - [ ] 已导出封面 `out/<id>/cover.png`
 - [ ] `npm run typecheck` 通过；`npm run studio` 目测节奏与封面 OK
 

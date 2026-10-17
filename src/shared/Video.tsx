@@ -4,6 +4,7 @@ import { Audio } from "@remotion/media";
 import { BeatProvider } from "./runtime/beat-context";
 import { BeatGrid, ProgressHud, SceneShell } from "./components";
 import { CL, makeBeat } from "./core/timing";
+import { getSceneRanges } from "./core/scene-timeline";
 import { C } from "./core/theme";
 import { VideoSpec } from "./core/types";
 
@@ -15,6 +16,7 @@ export const Video: React.FC<{ spec: VideoSpec }> = ({ spec }) => {
   );
   const duration = beat.bf(spec.totalBeats) + spec.tailFrames;
   const bodyEnd = beat.bf(spec.totalBeats);
+  const ranges = useMemo(() => getSceneRanges(spec), [spec]);
   // 风格来源优先级：显式 Backdrop/Hud 覆盖 > style 整套风格包 > 默认网格背景与进度条
   const Backdrop = spec.Backdrop ?? spec.style?.Backdrop ?? BeatGrid;
   const Hud = spec.Hud ?? spec.style?.Hud ?? ProgressHud;
@@ -30,17 +32,14 @@ export const Video: React.FC<{ spec: VideoSpec }> = ({ spec }) => {
             volume={(f) => interpolate(f, [0, 10, bodyEnd, duration], [0, 1, 1, 0], CL)}
           />
         ) : null}
-        {spec.scenes.map((s, i) => {
-          const from = Math.max(0, beat.bf(s.start) - beat.TRANS);
-          const isLast = i === spec.scenes.length - 1;
-          // 场景在 end 拍结束；下一场景从 end 拍前 TRANS 帧开始盖上来
-          const dur = isLast ? duration - from : beat.bf(s.end) - from;
-          const Comp = s.Comp;
+        {ranges.map((r, i) => {
+          const isLast = i === ranges.length - 1;
+          const Comp = spec.scenes[i].Comp;
           return (
-            <Sequence key={s.start} from={from} durationInFrames={dur} name={Comp.name}>
-              <SceneShell type={s.trans} total={isLast ? dur + 999 : dur} bg={s.bg} exitDim={exitDim}>
+            <Sequence key={r.startBeat} from={r.from} durationInFrames={r.durationInFrames} name={r.name}>
+              <SceneShell type={r.trans} total={isLast ? r.durationInFrames + 999 : r.durationInFrames} bg={spec.scenes[i].bg} exitDim={exitDim}>
                 <Backdrop />
-                <Comp start={s.start} />
+                <Comp start={r.startBeat} />
               </SceneShell>
             </Sequence>
           );

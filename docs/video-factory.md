@@ -44,7 +44,7 @@ src/videos/<id>/
 
 ---
 
-## 二、加新视频 5 步
+## 二、加新视频 7 步
 
 1. **复制骨架**：把 `src/videos/_template/` 复制成 `src/videos/<id>/`（`_template` 本身不注册为 Composition）。
 2. **选风格**（可选）：参考 `src/styles/README.md` 挑一套风格包，在 `kit/index.ts` 写一行
@@ -54,6 +54,7 @@ src/videos/<id>/
 4. **算节拍**：`npm run beat -- public/<id>/bgm.mp3`，把输出的 `bpm` / `offset` / `totalBeats` 填进 `spec.ts`。
 5. **写场景**：改造 `scenes/` 下的场景，调整 `spec.ts` 里 scenes 表的拍号（切换点应落在强拍上）。
 6. **注册**：在 `src/videos/index.ts` 里 `import` 并加入 `VIDEOS` 数组。
+7. **启动预览**：`npm run preview` → `http://127.0.0.1:5180/?v=<id>`。生成完素材先看效果，确认后再渲染。
 
 ---
 
@@ -72,11 +73,16 @@ src/videos/<id>/
 
 | 命令 | 作用 |
 |---|---|
+| `npm run preview` | 本地实时预览（`http://127.0.0.1:5180`），改代码热更新，不渲染 |
+| `npm run typecheck:preview` | 预览页类型检查 |
 | `npm run studio` | 打开 Remotion Studio 预览 |
 | `npm run render -- <id> out/<id>/<id>.mp4` | 渲染指定视频（产物进 `out/<id>/`） |
 | `npm run still` | 渲染静态帧 |
 | `npm run beat -- <音频路径>` | 分析 BGM 得出 BPM/相位 |
 | `npm run typecheck` | 类型检查 |
+
+> 开发期先用 `npm run preview` 看效果，确认后再 `npm run render`。
+> 预览页右上角也有「渲染成片」，支持试渲染（90 帧 / 0.5×）、当前场景、全片，产物落 `out/preview/`。
 
 渲染风格演示片 / 展示页：
 `npm run render -- StyleDemo-<风格id> out/styles/demo-<风格id>.mp4`、`npm run still -- StyleGallery out/styles/gallery.png`
