@@ -51,7 +51,7 @@ export const RemotionRoot = () => (
         height={spec.height}
       />
     ))}
-    {/* 风格展示页：一页 15 格总览（Still） */}
+    {/* 风格展示页：一页 16 格总览（Still） */}
     <Still id="StyleGallery" component={StyleGallery} width={1920} height={1080} />
     {/* 风格封面：每套风格一张静态封面（StyleCover-<id>，用于仓库内预览副本 src/styles/preview/） */}
     {STYLE_COVERS.map(({ id, Comp }) => (

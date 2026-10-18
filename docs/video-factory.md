@@ -86,7 +86,7 @@ src/videos/<id>/
 
 渲染风格演示片 / 展示页：
 `npm run render -- StyleDemo-<风格id> out/styles/demo-<风格id>.mp4`、`npm run still -- StyleGallery out/styles/gallery.png`
-（仓库内预览副本在 `src/styles/preview/`：15 演示片 + 15 风格封面 + 总览页 + 视觉索引，再生成命令见其 README）
+（仓库内预览副本在 `src/styles/preview/`：16 演示片 + 16 风格封面 + 总览页 + 视觉索引，再生成命令见其 README）
 
 ---
 
@@ -96,9 +96,10 @@ src/videos/<id>/
 + `Backdrop`/`Hud` + 一整套**同名契约组件**（`Stage/Sub/Chapter/Slam/Card/Stamp/Mark/Kicks/Particles`）
 + 封面模板 `makeCover`。契约定义在 `src/styles/contract.ts`，所有原语是 `t/from` 纯函数（Still 可冻结渲染）。
 
-**已交付（15 套）**：`whiteboard` 白板手绘、`pixel` 像素风（含 OFL 像素中文字体）、`flat` 扁平 MG、
+**已交付（16 套）**：`whiteboard` 白板手绘、`pixel` 像素风（含 OFL 像素中文字体）、`flat` 扁平 MG、
 `shadowpuppet` 皮影戏、`cyberhud` 赛博 HUD、`datainfo` 数据信息图、`collage` 拼贴、`bauhaus` Bauhaus、`synthwave` Synthwave、
-`explode` 3D 拆解、`hanzi` 汉字演变、`variety` 综艺花字、`picturebook` 绘本科画、`mathviz` 数学可视化、`scale` 比例尺对比。
+`explode` 3D 拆解、`hanzi` 汉字演变、`variety` 综艺花字、`picturebook` 绘本科画、`mathviz` 数学可视化、`scale` 比例尺对比、
+`lyricmv` 歌词 MV（优设标题黑 + 血红韵脚块）。
 详情、色板表与批次规划见 **`src/styles/README.md`**。
 
 **怎么用**：
@@ -108,7 +109,7 @@ src/videos/<id>/
 - **默认不挂进度条 / HUD**：`spec` 不传 `Hud`，风格包的 `Hud` 置为 `() => null`；确需 HUD 才显式传，并在交付说明里写理由。
 - 风格演示片与展示页由 `src/styles/demo/` 提供，在 `src/Root.tsx` 注册（与业务视频解耦）；
   每套**风格封面**（`StyleCover-<id>`，用各 kit 的 `makeCover` 生成，文案来自 `demo/catalog.ts`）同处注册。
-- **仓库内预览副本**在 `src/styles/preview/`（`out/` 不入库）：15 支演示片 + 15 张封面 + 总览图 + 视觉索引 README。
+- **仓库内预览副本**在 `src/styles/preview/`（`out/` 不入库）：16 支演示片 + 16 张封面 + 总览图 + 视觉索引 README。
 
 ---
 

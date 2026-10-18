@@ -1,9 +1,9 @@
 # 风格库视觉索引 · Style Preview
 
-全部 **15 套**视频风格一览。媒体文件是 `out/styles/` 构建产物的仓库内预览副本（`out/` 不入库）；
+全部 **16 套**视频风格一览。媒体文件是 `out/styles/` 构建产物的仓库内预览副本（`out/` 不入库）；
 每套风格的代码、色板与详细说明见 [`../README.md`](../README.md)。
 
-## 总览（15 格）
+## 总览（16 格）
 
 ![gallery](./gallery.png)
 
@@ -99,6 +99,12 @@
 
 同屏缩放 · 镜头拉远 ｜ 演示片：[demo-scale.mp4](./demo-scale.mp4)
 
+### 16 · 歌词 MV `lyricmv`
+
+![cover-lyricmv](./cover-lyricmv.png)
+
+暗街韵脚 · 血色硬字 ｜ 演示片：[demo-lyricmv.mp4](./demo-lyricmv.mp4)
+
 ---
 
 ## 如何再生成
@@ -107,7 +113,7 @@
 
 ```bash
 for id in whiteboard pixel flat shadowpuppet cyberhud datainfo collage bauhaus synthwave \
-          explode hanzi variety picturebook mathviz scale; do
+          explode hanzi variety picturebook mathviz scale lyricmv; do
   npm run still -- "StyleCover-$id" "src/styles/preview/cover-$id.png"
 done
 ```
@@ -116,7 +122,7 @@ done
 
 ```bash
 for id in whiteboard pixel flat shadowpuppet cyberhud datainfo collage bauhaus synthwave \
-          explode hanzi variety picturebook mathviz scale; do
+          explode hanzi variety picturebook mathviz scale lyricmv; do
   npm run render -- "StyleDemo-$id" "out/styles/demo-$id.mp4"
 done
 npm run still -- StyleGallery out/styles/gallery.png

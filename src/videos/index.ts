@@ -11,6 +11,8 @@ import { laicaiCyber } from "./laicai-cyber/spec";
 import { duanshipin } from "./duanshipin/spec";
 import { roadster } from "./roadster/spec";
 import { iphoneFold } from "./iphone-fold/spec";
+import { patienceBattery } from "./patience-battery/spec";
+import { graduationMv } from "./graduation-mv/spec";
 
 // 视频清单：新增一支视频，在这里加一行即可
-export const VIDEOS: VideoSpec[] = [webRequest, qrcode, binarySearch, routePlanning, shengben, flowState, barnum, laicai, laicaiCyber, duanshipin, roadster, iphoneFold];
+export const VIDEOS: VideoSpec[] = [webRequest, qrcode, binarySearch, routePlanning, shengben, flowState, barnum, laicai, laicaiCyber, duanshipin, roadster, iphoneFold, patienceBattery, graduationMv];

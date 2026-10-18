@@ -7,6 +7,7 @@ import { kit as datainfo } from "../datainfo";
 import { kit as explode } from "../explode";
 import { kit as flat } from "../flat";
 import { kit as hanzi } from "../hanzi";
+import { kit as lyricmv } from "../lyricmv";
 import { kit as mathviz } from "../mathviz";
 import { kit as picturebook } from "../picturebook";
 import { kit as pixel } from "../pixel";
@@ -17,7 +18,7 @@ import { kit as variety } from "../variety";
 import { kit as whiteboard } from "../whiteboard";
 
 // 风格目录：name/tag 单一数据源（Gallery 瓦片 + 封面渲染 + 预览索引共用）。
-// 顺序 = README 状态总表 = 封面编号 01~15 的依据（注意与 DEMO_SPECS 顺序不同）。
+// 顺序 = README 状态总表 = 封面编号 01~16 的依据（注意与 DEMO_SPECS 顺序不同）。
 export type StyleCatalogEntry = { id: string; kit: StyleKit; name: string; tag: string };
 
 export const STYLE_CATALOG: StyleCatalogEntry[] = [
@@ -36,6 +37,7 @@ export const STYLE_CATALOG: StyleCatalogEntry[] = [
     { id: "picturebook", kit: picturebook, name: "绘本科画", tag: "钢笔线稿 · 蜡笔涂色" },
     { id: "mathviz", kit: mathviz, name: "数学可视化", tag: "干净几何 · 公式浮现" },
     { id: "scale", kit: scale, name: "比例尺对比", tag: "同屏缩放 · 镜头拉远" },
+    { id: "lyricmv", kit: lyricmv, name: "歌词 MV", tag: "暗街韵脚 · 血色硬字" },
 ];
 
 // 风格封面组件：用每套自己的 makeCover 生成（风格名 + 一句话定位 + 两位编号），在 Root 注册为 StyleCover-<id> Still

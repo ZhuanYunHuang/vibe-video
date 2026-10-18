@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import type { SceneRange } from "@src/shared/core/scene-timeline";
 import { FPS } from "@src/shared/core/timing";
-import type { VideoSpec } from "@src/shared/core/types";
 import { useRenderJob, type RenderMode } from "./useRenderJob";
 
 const etaText = (s: number | null | undefined) => {
@@ -13,24 +12,24 @@ const etaText = (s: number | null | undefined) => {
 };
 
 export const RenderPanel: React.FC<{
-    spec: VideoSpec;
-    scene: SceneRange;
+    id: string;
+    scene?: SceneRange;
     onClose: () => void;
     onBeforeStart: () => void;
-}> = ({ spec, scene, onClose, onBeforeStart }) => {
+}> = ({ id, scene, onClose, onBeforeStart }) => {
     const { job, error, busy, start, cancel } = useRenderJob();
     const [mode, setMode] = useState<RenderMode>("test");
     const [scale, setScale] = useState(0.5);
     const [copied, setCopied] = useState(false);
 
-    const sceneFrames = useMemo(() => [scene.from, scene.endExclusive - 1] as [number, number], [scene]);
+    const sceneFrames = useMemo(() => (scene ? ([scene.from, scene.endExclusive - 1] as [number, number]) : null), [scene]);
 
     const begin = () => {
         onBeforeStart();
         void start({
-            id: spec.id,
+            id,
             mode,
-            frames: mode === "test" ? [0, 89] : mode === "scene" ? sceneFrames : undefined,
+            frames: mode === "test" ? [0, 89] : mode === "scene" && sceneFrames ? sceneFrames : undefined,
             scale: mode === "test" ? scale : undefined,
         });
     };
@@ -56,7 +55,8 @@ export const RenderPanel: React.FC<{
                     <div>
                         <div className="rp-title">渲染成片</div>
                         <div className="rp-sub">
-                            {spec.id} · {scene.name}
+                            {id}
+                            {scene ? ` · ${scene.name}` : ""}
                         </div>
                     </div>
                     <button className="icon" onClick={onClose}>
@@ -70,11 +70,16 @@ export const RenderPanel: React.FC<{
                             {(
                                 [
                                     ["test", "试渲染", "前 90 帧 · 约 30 秒"],
-                                    ["scene", "当前场景", `${(scene.durationInFrames / FPS).toFixed(1)}s`],
+                                    ["scene", "当前场景", scene ? `${(scene.durationInFrames / FPS).toFixed(1)}s` : "无分场"],
                                     ["full", "全片", "1080p · 约 10 分钟"],
                                 ] as [RenderMode, string, string][]
                             ).map(([m, label, hint]) => (
-                                <button key={m} className={`rp-mode ${mode === m ? "on" : ""}`} onClick={() => setMode(m)}>
+                                <button
+                                    key={m}
+                                    className={`rp-mode ${mode === m ? "on" : ""} ${m === "scene" && !scene ? "disabled" : ""}`}
+                                    disabled={m === "scene" && !scene}
+                                    onClick={() => setMode(m)}
+                                >
                                     <span className="rp-mode-t">{label}</span>
                                     <span className="rp-mode-h">{hint}</span>
                                 </button>
@@ -93,9 +98,7 @@ export const RenderPanel: React.FC<{
                         ) : null}
 
                         <div className="rp-note">
-                            {mode === "full"
-                                ? "全片渲染会占用 CPU/GPU，期间预览可能变卡；可以随时取消。"
-                                : "只渲染一小段，用来确认排版、节奏和音频，不产出交付版。"}
+                            {mode === "full" ? "全片渲染会占用 CPU/GPU，期间预览可能变卡；可以随时取消。" : "只渲染一小段，用来确认排版、节奏和音频，不产出交付版。"}
                         </div>
 
                         <button className="rp-start" onClick={begin}>

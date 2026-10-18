@@ -7,6 +7,7 @@ import { kit as datainfo } from "../datainfo";
 import { kit as explode } from "../explode";
 import { kit as flat } from "../flat";
 import { kit as hanzi } from "../hanzi";
+import { kit as lyricmv } from "../lyricmv";
 import { kit as mathviz } from "../mathviz";
 import { kit as pixel } from "../pixel";
 import { kit as picturebook } from "../picturebook";
@@ -36,4 +37,4 @@ export const makeDemoSpec = (kit: StyleKit): VideoSpec => ({
     ],
 });
 
-export const DEMO_SPECS: VideoSpec[] = [whiteboard, pixel, flat, shadowpuppet, cyberhud, datainfo, collage, bauhaus, synthwave, mathviz, scale, picturebook, variety, hanzi, explode].map(makeDemoSpec);
+export const DEMO_SPECS: VideoSpec[] = [whiteboard, pixel, flat, shadowpuppet, cyberhud, datainfo, collage, bauhaus, synthwave, mathviz, scale, picturebook, variety, hanzi, explode, lyricmv].map(makeDemoSpec);

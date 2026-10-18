@@ -3,10 +3,8 @@ import { Player, type PlayerRef } from "@remotion/player";
 import type { SceneRange } from "@src/shared/core/scene-timeline";
 import { getSceneRanges } from "@src/shared/core/scene-timeline";
 import { FPS } from "@src/shared/core/timing";
-import type { VideoSpec } from "@src/shared/core/types";
-import { videoDuration } from "@src/shared/Video";
-import { VIDEOS } from "@src/videos";
-import { SceneList } from "../debug/SceneList";
+import { FrameHud, SceneList } from "../debug/SceneList";
+import type { PreviewItem } from "../data/items";
 import { RenderPanel } from "../render/RenderPanel";
 import { PreviewComposition } from "./PreviewComposition";
 
@@ -21,21 +19,29 @@ const timecode = (frame: number) => {
 };
 
 export const PlayerPage: React.FC<{
-    spec: VideoSpec;
+    item: PreviewItem;
+    all: PreviewItem[];
     debug: boolean;
+    startFrame?: number;
     onToggleDebug: () => void;
     onBack: () => void;
     onPick: (id: string) => void;
-}> = ({ spec, debug, onToggleDebug, onBack, onPick }) => {
-    const duration = useMemo(() => videoDuration(spec), [spec]);
-    const ranges = useMemo(() => getSceneRanges(spec), [spec]);
+}> = ({ item, all, debug, startFrame, onToggleDebug, onBack, onPick }) => {
+    const duration = item.durationInFrames;
+    const ranges = useMemo(() => (item.spec ? getSceneRanges(item.spec) : []), [item.spec]);
+    const bpm = item.spec?.bpm ?? 120;
+    const offset = item.spec?.offset ?? 0;
+
     const playerRef = useRef<PlayerRef>(null);
     const stageRef = useRef<HTMLDivElement>(null);
     const frameRef = useRef(0);
 
     const initialFrame = useMemo(() => {
+        if (typeof startFrame === "number" && Number.isFinite(startFrame)) {
+            return Math.min(Math.max(0, Math.round(startFrame)), duration - 1);
+        }
         try {
-            const raw = sessionStorage.getItem(sessionKey(spec.id));
+            const raw = sessionStorage.getItem(sessionKey(item.id));
             if (raw) {
                 const v = JSON.parse(raw) as { frame?: number };
                 if (typeof v.frame === "number" && Number.isFinite(v.frame)) {
@@ -46,7 +52,7 @@ export const PlayerPage: React.FC<{
             // 忽略损坏的会话数据
         }
         return 0;
-    }, [spec.id, duration]);
+    }, [item.id, duration, startFrame]);
 
     const [frame, setFrame] = useState(initialFrame);
     const [playing, setPlaying] = useState(false);
@@ -58,12 +64,14 @@ export const PlayerPage: React.FC<{
 
     // 当前场景：重叠转场时取「正在进场」的那一场
     const current = useMemo(() => {
+        if (!ranges.length) return 0;
         let idx = 0;
         for (let i = 0; i < ranges.length; i += 1) if (frame >= ranges[i].from) idx = i;
         return idx;
     }, [frame, ranges]);
     const currentRef = useRef(current);
     currentRef.current = current;
+    const loopRange = ranges[current];
 
     frameRef.current = frame;
 
@@ -95,7 +103,7 @@ export const PlayerPage: React.FC<{
     useEffect(() => {
         const save = () => {
             try {
-                sessionStorage.setItem(sessionKey(spec.id), JSON.stringify({ frame: frameRef.current }));
+                sessionStorage.setItem(sessionKey(item.id), JSON.stringify({ frame: frameRef.current }));
             } catch {
                 // 隐私模式下忽略
             }
@@ -109,7 +117,7 @@ export const PlayerPage: React.FC<{
             window.removeEventListener("pagehide", save);
             hot?.off("vite:beforeFullReload", save);
         };
-    }, [spec.id]);
+    }, [item.id]);
 
     // 控制条：鼠标静止且正在播放时隐藏
     useEffect(() => {
@@ -132,11 +140,11 @@ export const PlayerPage: React.FC<{
         (f: number) => {
             const p = playerRef.current;
             if (!p) return;
-            const lo = loopScene ? ranges[currentRef.current].from : 0;
-            const hi = loopScene ? ranges[currentRef.current].endExclusive - 1 : duration - 1;
+            const lo = loopScene && loopRange ? loopRange.from : 0;
+            const hi = loopScene && loopRange ? loopRange.endExclusive - 1 : duration - 1;
             p.seekTo(Math.min(Math.max(Math.round(f), lo), hi));
         },
-        [duration, loopScene, ranges],
+        [duration, loopScene, loopRange],
     );
 
     const togglePlay = useCallback((e?: React.SyntheticEvent) => {
@@ -169,11 +177,11 @@ export const PlayerPage: React.FC<{
         const p = playerRef.current;
         const next = !loopScene;
         setLoopScene(next);
-        if (next && p) {
+        if (next && p && loopRange) {
             p.pause();
-            p.seekTo(ranges[currentRef.current].from);
+            p.seekTo(loopRange.from);
         }
-    }, [loopScene, ranges]);
+    }, [loopScene, loopRange]);
 
     const toggleFullscreen = useCallback(() => {
         if (document.fullscreenElement) void document.exitFullscreen();
@@ -204,16 +212,22 @@ export const PlayerPage: React.FC<{
                     seek(frameRef.current + step);
                     break;
                 case "[":
-                    e.preventDefault();
-                    selectScene(ranges[Math.max(0, idx - 1)]);
+                    if (ranges.length) {
+                        e.preventDefault();
+                        selectScene(ranges[Math.max(0, idx - 1)]);
+                    }
                     break;
                 case "]":
-                    e.preventDefault();
-                    selectScene(ranges[Math.min(ranges.length - 1, idx + 1)]);
+                    if (ranges.length) {
+                        e.preventDefault();
+                        selectScene(ranges[Math.min(ranges.length - 1, idx + 1)]);
+                    }
                     break;
                 case "Home":
-                    e.preventDefault();
-                    selectScene(ranges[0]);
+                    if (ranges.length) {
+                        e.preventDefault();
+                        selectScene(ranges[0]);
+                    }
                     break;
                 case "End":
                     e.preventDefault();
@@ -246,19 +260,19 @@ export const PlayerPage: React.FC<{
         return () => window.removeEventListener("keydown", onKey);
     }, [duration, onToggleDebug, ranges, seek, selectScene, toggleFullscreen, toggleMute, togglePlay]);
 
-    const loopRange = ranges[current];
-    const inFrame = loopScene ? loopRange.from : 0;
-    const outFrame = loopScene ? loopRange.endExclusive - 1 : duration - 1;
+    const Comp = (item.spec ? PreviewComposition : item.component) as React.FC<Record<string, unknown>>;
+    const inFrame = loopScene && loopRange ? loopRange.from : 0;
+    const outFrame = loopScene && loopRange ? loopRange.endExclusive - 1 : duration - 1;
 
     return (
         <div className={`player ${chrome ? "" : "bare"} ${debug ? "with-debug" : ""}`} ref={stageRef}>
             <Player
                 ref={playerRef}
-                component={PreviewComposition}
-                inputProps={{ spec }}
+                component={Comp}
+                inputProps={item.spec ? ({ spec: item.spec } as Record<string, unknown>) : {}}
                 durationInFrames={duration}
-                compositionWidth={spec.width}
-                compositionHeight={spec.height}
+                compositionWidth={item.width}
+                compositionHeight={item.height}
                 fps={FPS}
                 controls={false}
                 clickToPlay
@@ -286,18 +300,32 @@ export const PlayerPage: React.FC<{
                     ←
                 </button>
                 <div className="titles">
-                    <div className="t">{spec.id}</div>
+                    <div className="t">{item.title}</div>
                     <div className="s">
-                        {loopRange.name} · {loopRange.startBeat}–{loopRange.endBeat} 拍
+                        {item.id}
+                        {loopRange ? ` · ${loopRange.name} · ${loopRange.startBeat}–${loopRange.endBeat} 拍` : ""}
                     </div>
                 </div>
                 <div className="spacer" />
-                <select className="picker" value={spec.id} onChange={(e) => onPick(e.target.value)}>
-                    {VIDEOS.map((v) => (
-                        <option key={v.id} value={v.id}>
-                            {v.id}
-                        </option>
-                    ))}
+                <select className="picker" value={item.id} onChange={(e) => onPick(e.target.value)}>
+                    <optgroup label="业务视频">
+                        {all
+                            .filter((v) => v.kind === "video")
+                            .map((v) => (
+                                <option key={v.id} value={v.id}>
+                                    {v.title}
+                                </option>
+                            ))}
+                    </optgroup>
+                    <optgroup label="特效 Demo">
+                        {all
+                            .filter((v) => v.kind !== "video")
+                            .map((v) => (
+                                <option key={v.id} value={v.id}>
+                                    {v.title}
+                                </option>
+                            ))}
+                    </optgroup>
                 </select>
                 <button className={debug ? "on" : ""} onClick={onToggleDebug}>
                     调试 D
@@ -337,26 +365,28 @@ export const PlayerPage: React.FC<{
             </div>
 
             {debug ? (
-                <SceneList
-                    ranges={ranges}
-                    frame={frame}
-                    duration={duration}
-                    bpm={spec.bpm}
-                    offset={spec.offset}
-                    current={current}
-                    loop={loopScene}
-                    onSelect={selectScene}
-                    onToggleLoop={toggleLoop}
-                />
+                ranges.length ? (
+                    <SceneList
+                        ranges={ranges}
+                        frame={frame}
+                        duration={duration}
+                        bpm={bpm}
+                        offset={offset}
+                        current={current}
+                        loop={loopScene}
+                        onSelect={selectScene}
+                        onToggleLoop={toggleLoop}
+                    />
+                ) : (
+                    <aside className="debug">
+                        <FrameHud frame={frame} duration={duration} bpm={bpm} offset={offset} scene={null} />
+                        <div className="debug-empty">这个 Demo 没有分场，直接看画面即可。</div>
+                    </aside>
+                )
             ) : null}
 
             {renderOpen ? (
-                <RenderPanel
-                    spec={spec}
-                    scene={loopRange}
-                    onClose={() => setRenderOpen(false)}
-                    onBeforeStart={() => playerRef.current?.pause()}
-                />
+                <RenderPanel id={item.id} scene={loopRange} onClose={() => setRenderOpen(false)} onBeforeStart={() => playerRef.current?.pause()} />
             ) : null}
         </div>
     );

@@ -1,9 +1,10 @@
 import React from "react";
 import type { StyleKit } from "../contract";
+import { Fonts as LyricFonts } from "../lyricmv";
 import { PixelFontLoader } from "../pixel/Fonts";
 import { STYLE_CATALOG } from "./catalog";
 
-// 风格展示页（Still）：15 格总览（3 列 × 5 行），15 套全部交付。
+// 风格展示页（Still）：16 格总览（4 列 × 4 行），16 套全部交付。
 // 只使用各 kit 的 Backdrop（仅 useCurrentFrame，Still 安全），不依赖 beat；瓦片数据来自 catalog。
 
 const PALETTE_KEYS = ["bg", "bgAlt", "card", "ink", "inkSub", "line", "accent", "accentDeep", "accentLight", "gold", "seal"] as const;
@@ -28,21 +29,22 @@ const KitTile: React.FC<{ kit: StyleKit; name: string; tag: string }> = ({ kit, 
     );
 };
 
-const TILE_W = 600;
-const TILE_H = 176;
+const TILE_W = 448;
+const TILE_H = 212;
 const GAP = 14;
 
 export const StyleGallery: React.FC = () => (
     <div style={{ position: "absolute", inset: 0, background: "#F2F2F0", overflow: "hidden" }}>
         <PixelFontLoader />
+        <LyricFonts />
         <div style={{ position: "absolute", left: 0, right: 0, top: 26, textAlign: "center", fontFamily: '"Microsoft YaHei",sans-serif', fontSize: 34, fontWeight: 700, color: "#22262E", letterSpacing: 4 }}>
-            风格库 · STYLE KITS —— 15 套全部交付
+            风格库 · STYLE KITS —— 16 套全部交付
         </div>
         {STYLE_CATALOG.map((tile, i) => {
-            const col = i % 3;
-            const row = Math.floor(i / 3);
+            const col = i % 4;
+            const row = Math.floor(i / 4);
             const x = 42 + col * (TILE_W + GAP);
-            const y = 84 + row * (TILE_H + GAP * 0.9);
+            const y = 94 + row * (TILE_H + GAP);
             return (
                 <div key={i} style={{ position: "absolute", left: x, top: y, width: TILE_W, height: TILE_H, border: "2px solid #2E2A2422", overflow: "hidden" }}>
                     <KitTile kit={tile.kit} name={tile.name} tag={tile.tag} />

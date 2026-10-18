@@ -783,3 +783,42 @@ button.primary:hover {
         width: calc(100vw - 32px);
     }
 }
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 30px 0 14px;
+}
+
+.section-head h2 {
+    font-size: 18px;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.section-head span {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 12px;
+    color: var(--sub);
+}
+
+.debug-empty {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--sub);
+    line-height: 1.7;
+}
+
+.rp-mode.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.rp-mode.disabled:hover {
+    background: #11151d;
+    border-color: var(--line);
+}
