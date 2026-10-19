@@ -161,6 +161,7 @@ export const MyScene: React.FC<SceneProps> = ({ start }) => {
 - `TransType` 可选值：`none | zoom | slideLeft | slideUp | circle | blinds | diag | spin | glitch | fade`。
   - 相邻场景**布局一致**时用 `fade` 交叉淡入，画面连续不跳。
   - 大卡点处（★）可用更"重"的转场；全屏覆盖式的招牌转场（如整屏路线扫过）底层场景设 `trans: "none"` 硬切即可。
+  - **不要每场都闪白**：整屏白闪只在全片最强的一次卡点（如歌词 MV 的进鼓点）用一次；逐场/逐句闪白会刺眼，默认不做。
 
 ### 步骤 6 · 注册
 在 `src/videos/index.ts` 里 `import` 新 spec 并加入 `VIDEOS` 数组：

@@ -11,15 +11,16 @@ export type Pal = {
     block: string;
     blockInk: string;
     flash: string;
+    burst: string;
     scan: number;
     grain: number;
     vig: number;
 };
 
 export const PAL: Record<ThemeId, Pal> = {
-    dark: { bg: "#050505", ink: "#EFE9DA", accent: "#C8102E", dim: "#6E675C", block: "#C8102E", blockInk: "#EFE9DA", flash: "#EFE9DA", scan: 0.14, grain: 0.13, vig: 1 },
-    red: { bg: "#C8102E", ink: "#F8F2E4", accent: "#0A0A0A", dim: "#F8F2E4", block: "#F8F2E4", blockInk: "#C8102E", flash: "#F8F2E4", scan: 0.1, grain: 0.07, vig: 0.55 },
-    white: { bg: "#F2EDE3", ink: "#0A0A0A", accent: "#C8102E", dim: "#8A8580", block: "#C8102E", blockInk: "#F2EDE3", flash: "#0A0A0A", scan: 0.07, grain: 0.05, vig: 0.3 },
+    dark: { bg: "#050505", ink: "#EFE9DA", accent: "#C8102E", dim: "#6E675C", block: "#C8102E", blockInk: "#EFE9DA", flash: "#EFE9DA", burst: "#EFE9DA", scan: 0.14, grain: 0.13, vig: 1 },
+    red: { bg: "#C8102E", ink: "#F8F2E4", accent: "#0A0A0A", dim: "#F8F2E4", block: "#F8F2E4", blockInk: "#C8102E", flash: "#F8F2E4", burst: "#F8F2E4", scan: 0.1, grain: 0.07, vig: 0.55 },
+    white: { bg: "#F2EDE3", ink: "#0A0A0A", accent: "#C8102E", dim: "#8A8580", block: "#C8102E", blockInk: "#F2EDE3", flash: "#0A0A0A", burst: "#C8102E", scan: 0.07, grain: 0.05, vig: 0.3 },
 };
 
 export const P: StylePalette = {

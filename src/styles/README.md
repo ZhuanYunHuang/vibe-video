@@ -356,6 +356,8 @@ gold `#3DE8FF`（霓虹青）/ seal `#FFD23F`（落日黄）。星点 + 条纹�
 - Sub：底部歌词行 + 左侧血红短规；HUD：1px 进度线 + `L.xx` + 时间码，无百分比条；
 - Mark：细红括号 / 下划线横扫；Particles：低密度尘埃。
 
+**转场规则**：不做逐句整屏闪白（久看刺眼），全片只在进鼓点（`dropSec`）闪 1 帧；`LyricStage` 已内置该约束，场景不要额外加 `CutFlash`。
+
 **额外配色**：`PAL.dark / PAL.red / PAL.white` 三套，供进鼓后整屏翻红白时切换；`rhyme` 类场景可直接取 `block / blockInk`。
 
 **选用示例**：`export * from "../../../styles/lyricmv";`
