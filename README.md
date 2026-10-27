@@ -92,7 +92,7 @@ public/<id>/           该片的 BGM、配音、封面图等静态资源
 out/<id>/              交付产物（成片、封面）
 out/preview/           预览页触发的渲染产物
 docs/                  视频工厂手册
-.trae/skills/          视频生成 Skill（Agent 施工流程）
+.trae/skills/          项目级 Skills（视频生成、音频分离）
 ```
 
 ---
@@ -114,4 +114,5 @@ docs/                  视频工厂手册
 
 - [视频工厂手册](docs/video-factory.md) —— 目录边界、加片流程、资源规范
 - [视频生成 Skill](.trae/skills/video-generation/SKILL.md) —— Agent 按图施工的完整流程与检查清单
+- [音频分离 Skill](.trae/skills/audio-separation/SKILL.md) —— Demucs 分人声/伴奏，成品统一落 `out/`
 - [风格库说明](src/styles/README.md) —— 16 套风格的色板、组件与适用场景
